@@ -1,0 +1,275 @@
+todo liste du projet BNGRC en trinome 
+============================================================
+
+ - BACKEND MODELS & DATABASE
+=======================================
+
+Base de Données et Modèles
+-Tables MySQL ok
+    -regions (id, nom) ok
+    -villes (id, nom, region_id FK) ok
+    -besoins (id, ville_id, type_besoin, description, quantite, prix_unitaire) ok
+    -dons (id, type_don, description, quantite) ok
+    -distributions (id, besoin_id, don_id, quantite_attribuee) ok
+
+-Model RegionModel ok
+    -getAll() : SELECT * FROM regions ok
+    -getById($id) : région par ID ok
+    -create($nom) : INSERT ok
+    -delete($id) : DELETE ok
+
+-Model VilleModel ok
+    -getAll() : villes + JOIN regions ok
+    -getById($id) : ville par ID ok
+    -create($nom, $region_id) : INSERT ok
+    -delete($id) : DELETE ok
+
+-Model BesoinModel ok
+    -getAllWithVille() : besoins + ville_nom ok
+    -create($ville_id, $type, $desc, $qte, $prix) : INSERT ok
+    -getNonSatisfaits() : LEFT JOIN calcul quantite_restante ok
+    -delete($id) : DELETE ok
+
+-Model DonModel ok
+    -getAll() : SELECT * FROM dons ok
+    -create($type, $desc, $qte) : INSERT ok
+    -getNonDistribues() : LEFT JOIN calcul quantite_restante ok
+    -delete($id) : DELETE ok
+
+-Model DistributionModel ok
+    -create($besoin_id, $don_id, $qte) : INSERT ok
+    -getAllWithDetails() : 5-table JOIN ok
+    -getDistributionsParVille($id) : total par ville ok
+
+
+- BACKEND CONTROLLERS & ROUTES
+==========================================
+
+Contrôleurs
+-DashboardController ok
+    -index() : récupère stats + KPI + villes_stats ok
+    -Affiche 4 KPI + tableau villes avec statuts ok
+     -Récupérer les données des villes avec besoins et dons ok
+     -render vers views/pages/dashboard.php ok
+
+-BesoinController ok
+    -index() : affiche formulaire + liste besoins ok
+    -store() : validation type + quantité > 0 et  Enregistrer un besoin ok
+
+-DonController ok
+    -index() : affiche formulaire + liste dons ok
+    -store() : validation type + quantité > 0 et Enregistrer un don ok
+
+-VilleController ok
+    -index() : formulaire régions + villes ok
+    -store() : créer région ok
+    -storeRegion() : créer région ok
+    -delete() : supprimer ville ok
+
+-DispatchController ok
+    -index() : page dispatch + distributions ok
+    -run() : ALGORITHME ( pour la fonctionaliter  par ordre de date et de saisi pour le distribution ) :
+      -Récupérer tous les besoins non satisfaits (avec quantite_restante) ok
+            -Récupérer tous les dons non distribués (avec quantite_restante) ok
+            -Trier besoins par date (ASC) ok
+            -Trier dons par date (ASC) ok
+            
+            -Pour chaque don dans dons_tries ok
+            -Pour chaque besoin dans besoins_tries ok
+            -Si don.type == besoin.type_ besoin ET don.description == besoin.description ok
+            -quantite_a_attribuer = MIN(don.quantite_restante, besoin.quantite_restante) ok
+            -SI quantite_a_attribuer > 0 ok
+            -DistributionModel.create(besoin.id, don.id, quantite_a_attribuer) ok
+            -Mettre à jour quantites_restantes en mémoire   ok
+
+
+Routes (app/config/routes.php)
+   -/ : DashboardController.index ok
+        -/besoins : BesoinController.index ok
+        -/besoins/store : BesoinController.store (POST) ok
+        -/dons : DonController.index ok
+        -/dons/store : DonController.store (POST) ok
+        -/dispatch : DispatchController.index ok
+        -/dispatch/run : DispatchController.run (POST) ok
+
+ FRONTEND VIEWS & DESIGN
+=====================================
+
+Layouts
+-header.php ok
+    -Navbar avec brand icon BNGRC ok
+    -Navigation active dynamique avec PHP ok
+-footer.php ok
+    -Deux colonnes responsive ok
+    -Année dynamique avec PHP ok
+    -Wrapped dans main.main-content ok
+
+Pages
+-dashboard.php ok
+    -Tableau des villes avec ok
+            -Nom de la ville ok
+            -Besoins (liste détaillée) ok
+            -Dons attribués (total) ok
+            -Statut (Satisfait/Partiel/Non satisfait) avec couleur ok
+        
+            -Nombre total de villes ok
+            -Nombre total de besoins ok
+            -Nombre total de dons ok
+            -Taux de satisfaction global ok
+
+-besoins.php ok
+    -Formulaire  (type, description, quantité, prix) ok
+    -Emojis type  ok
+    -Liste avec type badges ok
+    -Search input ok
+    -Delete buttons ok
+    -include header ok
+    -include footer ok
+    -Input number pour quantité ok
+    -Input number pour prix unitaire ok
+
+-dons.php ok
+    -Formulaire  (type, description, quantité) ok
+    -Emojis type ok
+    -Liste avec type badges ok
+    -Search input ok
+    -Delete buttons ok
+    -include header ok
+    -include footer ok
+
+-dispatch.php ok
+        -Bouton "Lancer la simulation de dispatch" ok
+        -Message de confirmation : "X distributions ont été créées" ok
+        -Tableau récapitulatif des dernières distributions ok
+    -include header ok
+    -include footer ok
+
+-villes.php ok
+    -Formulaire d'ajout de ville ok
+    -Liste des villes avec bouton supprimer ok
+    -Delete confirmation ok
+    -include header ok
+    -include footer ok
+
+CSS (public/css/style.css)
+-Design System ok
+
+JavaScript (public/js/script.js)
+-Features ok
+    -Live clock update chaque seconde ok
+    -KPI count-up animation ok
+    -Table search/filter ok
+    -Bootstrap form validation ok
+    -Delete confirmation dialog ok
+    -Dispatch loading spinner ok
+    -Auto-dismiss alerts (5s fade) ok
+    -Navbar scroll shadow ok
+
+
+    
+-Voir les fonctionnalités du projet ok
+    -Pages nécessaires ok
+        -Tableau de bord (dashboard) ok
+        -Saisie des besoins ok
+        -Saisie des dons ok
+        -Simulation de dispatch ok
+
+    BASE DE DONNER : ok
+    -Créer les tables ok
+        -Table villes ok
+            -id INT PRIMARY KEY AUTO_INCREMENT ok
+            -nom VARCHAR(100) ok
+            -region VARCHAR(100) ok
+        
+        -Table besoins ok
+            -id INT PRIMARY KEY AUTO_INCREMENT ok
+            -ville_id INT (FOREIGN KEY vers villes) ok
+            -type_besoin ENUM('nature', 'materiaux', 'argent') ok
+            -description VARCHAR(255) ok
+            -quantite INT ok
+            -prix_unitaire DECIMAL(10,2) ok
+            -date_besoin DATETIME DEFAULT CURRENT_TIMESTAMP ok
+        
+        -Table dons ok
+            -id INT PRIMARY KEY AUTO_INCREMENT ok
+            -type_don ENUM('nature', 'materiaux', 'argent') ok
+            -description VARCHAR(255) ok
+            -quantite INT ok
+            -date_don DATETIME DEFAULT CURRENT_TIMESTAMP ok
+        
+        -Table distributions ok
+            -id INT PRIMARY KEY AUTO_INCREMENT ok
+            -besoin_id INT (FOREIGN KEY vers besoins) ok
+            -don_id INT (FOREIGN KEY vers dons) ok
+            -quantite_attribuee INT ok
+            -date_distribution DATETIME DEFAULT CURRENT_TIMESTAMP
+    
+ -Finalisation du design ok
+    -CSS ok
+        -style.css ok
+            -Rendre responsive (media queries) ok
+    
+    -Header/Footer ok
+        -Navigation entre les pages (Dashboard | Besoins | Dons | Dispatch) ok
+    
+    -Messages utilisateur ok
+        -Messages de succès après ajout ok
+        -Messages d'erreur si problème ok
+
+
+ NOUVELLES FONCTIONNALITÉS
+=====================================
+
+Système d'Achats
+-Table achats (besoin_id, don_id, quantite, montant_ht, frais, montant_total) ok
+-Config frais_achat = 10% ok
+-AchatModel ok
+    -create() ok
+    -getAllWithDetails() ok
+    -getByVille() ok
+    -getTotalAchatsByBesoin() ok
+    -getTotalDepenseByDon() ok
+-AchatController ok
+    -index() avec filtre ville ok
+    -store() avec validation ok
+    -Vérifier si besoin existe dans dons restants -> erreur ok
+-Vue achats.php ok
+    -Formulaire achat (besoin, don argent, quantité) ok
+    -Calcul dynamique JS du montant avec frais ok
+    -Tableau des achats avec filtre ville ok
+
+Simulation de Dispatch
+-DispatchController refactorisé ok
+    -calculerDistributions() privé : calcule sans sauvegarder ok
+    -simulate() : aperçu des distributions ok
+    -run() : exécute et sauvegarde ok
+-dispatch.php mis à jour ok
+    -Bouton Simuler ok
+    -Bouton Valider ok
+    -Tableau aperçu de simulation ok
+
+Page Récapitulation
+-RecapController ok
+    -index() : calcule et affiche récap ok
+    -data() : endpoint JSON pour Ajax ok
+-recap.php ok
+    -KPI cards (total besoins, satisfait, restant, %) ok
+    -Barre de progression globale ok
+    -Section dons argent (total, utilisé, dispo) ok
+    -Tableau détails par ville ok
+    -Bouton Actualiser Ajax ok
+
+Routes mises à jour
+-/achats ok
+-/achats/store ok
+-/dispatch/simulate ok
+-/recap ok
+-/recap/data ok
+
+Navigation mise à jour
+-Lien Achats dans header ok
+-Lien Récap dans header ok
+
+
+
+

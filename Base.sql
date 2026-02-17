@@ -1,6 +1,6 @@
 CREATE DATABASE IF NOT EXISTS bngrc_dons;
-USE bngrc_dons;
 
+USE bngrc_dons;
 CREATE TABLE regions (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nom VARCHAR(100) NOT NULL  -- ex: "Atsinanana", "Analamanga", "Vatovavy"

@@ -1,0 +1,21 @@
+git clone https://github.com/Tsinjo99/ETU004373_ETU004095_ETU004057.git
+
+
+git checkout dev
+git pull origin dev
+git checkout -b v1/v2
+git add .
+git commit -m "Version 1 et 2 ok"
+git push -u origin v1/v2
+
+git checkout dev
+git pull origin dev
+git merge v1/v2
+git push origin dev
+
+git checkout main
+git pull origin main
+git merge dev
+git push origin main
+
+github.com

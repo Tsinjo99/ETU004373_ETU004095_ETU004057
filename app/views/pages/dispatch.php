@@ -37,10 +37,9 @@ include __DIR__ . '/../layouts/header.php';
                 <div class="dispatch-icon">
                     <i class="bi bi-shuffle"></i>
                 </div>
-                <h3>Algorithme de Distribution</h3>
-                <p class="text-muted mb-4">
-                    L'algorithme va matcher chaque don avec les besoins correspondants (même type & description), 
-                    en respectant l'ordre chronologique (FIFO).
+                <h4>Algorithme de Distribution</h4>
+                <p class="text-muted mb-4 fs-6 fw-bold">
+                   <span class="text-danger fs-6 fw-bold">**</span> L'algorithme va matcher chaque don avec les besoins correspondants (même type & description).
                 </p>
                 <form action="/dispatch/run" method="POST" id="dispatchForm">
                     <button type="submit" class="btn btn-warning btn-lg btn-custom dispatch-btn" id="dispatchBtn">

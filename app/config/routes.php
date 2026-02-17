@@ -5,6 +5,8 @@ use app\controllers\BesoinController;
 use app\controllers\DonController;
 use app\controllers\DispatchController;
 use app\controllers\VilleController;
+use app\controllers\AchatController;
+use app\controllers\RecapController;
 use flight\Engine;
 use flight\net\Router;
 
@@ -28,6 +30,17 @@ $router->group('/dons', function(Router $router) {
 $router->group('/dispatch', function(Router $router) {
     $router->get('', [DispatchController::class, 'index']);
     $router->post('/run', [DispatchController::class, 'run']);
+    $router->post('/simulate', [DispatchController::class, 'simulate']);
+});
+
+$router->group('/achats', function(Router $router) {
+    $router->get('', [AchatController::class, 'index']);
+    $router->post('/store', [AchatController::class, 'store']);
+});
+
+$router->group('/recap', function(Router $router) {
+    $router->get('', [RecapController::class, 'index']);
+    $router->get('/data', [RecapController::class, 'data']);
 });
 
 $router->group('/villes', function(Router $router) {

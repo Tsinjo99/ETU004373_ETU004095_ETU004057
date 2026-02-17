@@ -31,26 +31,23 @@ class DispatchController
 
         $this->app->render('pages/dispatch', [
             'distributions' => $distributions,
+            'simulation' => null,
             'message' => $this->app->get('flash_message'),
             'error' => $this->app->get('flash_error'),
         ]);
     }
 
     /**
-     * Exécuter l'algorithme de dispatch
-     * - Trier besoins par date ASC
-     * - Trier dons par date ASC
-     * - Matcher par type ET description
-     * - Attribuer MIN(don.restante, besoin.restante)
+     * Calculer les distributions sans les enregistrer (simulation)
      */
-    public function run(): void
+    private function calculerDistributions(): array
     {
         $besoins = $this->besoinModel->getNonSatisfaits();
         $dons = $this->donModel->getNonDistribues();
 
-        $nb_distributions = 0;
+        $distributions_prevues = [];
 
-        // Copier les quantités restantes en mémoire pour manipulation
+        // Copier les quantités restantes en mémoire
         $dons_restants = [];
         foreach ($dons as $don) {
             $dons_restants[$don['id']] = (int) $don['quantite_restante'];
@@ -61,7 +58,13 @@ class DispatchController
             $besoins_restants[$besoin['id']] = (int) $besoin['quantite_restante'];
         }
 
-        // Algorithme de dispatch : pour chaque don, chercher des besoins correspondants
+        // Indexer les besoins par ID pour accès rapide
+        $besoins_index = [];
+        foreach ($besoins as $besoin) {
+            $besoins_index[$besoin['id']] = $besoin;
+        }
+
+        // Algorithme de dispatch
         foreach ($dons as $don) {
             if ($dons_restants[$don['id']] <= 0) {
                 continue;
@@ -83,29 +86,69 @@ class DispatchController
                     );
 
                     if ($quantite_a_attribuer > 0) {
-                        $this->distributionModel->create(
-                            $besoin['id'],
-                            $don['id'],
-                            $quantite_a_attribuer
-                        );
+                        $distributions_prevues[] = [
+                            'besoin_id' => $besoin['id'],
+                            'don_id' => $don['id'],
+                            'quantite' => $quantite_a_attribuer,
+                            'besoin_desc' => $besoin['description'],
+                            'don_desc' => $don['description'],
+                            'type' => $don['type_don'],
+                            'ville_nom' => $besoin['ville_nom'] ?? 'N/A',
+                        ];
 
                         $dons_restants[$don['id']] -= $quantite_a_attribuer;
                         $besoins_restants[$besoin['id']] -= $quantite_a_attribuer;
-                        $nb_distributions++;
                     }
                 }
 
-                // Si le don est épuisé, passer au suivant
                 if ($dons_restants[$don['id']] <= 0) {
                     break;
                 }
             }
         }
 
+        return $distributions_prevues;
+    }
+
+    /**
+     * Simuler le dispatch (aperçu sans enregistrement)
+     */
+    public function simulate(): void
+    {
+        $distributions_prevues = $this->calculerDistributions();
+        $distributions = $this->distributionModel->getAllWithDetails();
+
+        $this->app->render('pages/dispatch', [
+            'distributions' => $distributions,
+            'simulation' => $distributions_prevues,
+            'message' => count($distributions_prevues) > 0 
+                ? 'Simulation: ' . count($distributions_prevues) . ' distribution(s) possible(s). Cliquez sur Valider pour confirmer.'
+                : 'Aucune distribution possible.',
+            'error' => null,
+        ]);
+    }
+
+    /**
+     * Valider et exécuter le dispatch (enregistrement réel)
+     */
+    public function run(): void
+    {
+        $distributions_prevues = $this->calculerDistributions();
+        $nb_distributions = 0;
+
+        foreach ($distributions_prevues as $dist) {
+            $this->distributionModel->create(
+                $dist['besoin_id'],
+                $dist['don_id'],
+                $dist['quantite']
+            );
+            $nb_distributions++;
+        }
+
         if ($nb_distributions > 0) {
             $this->app->set('flash_message', $nb_distributions . ' distribution(s) créée(s) avec succès !');
         } else {
-            $this->app->set('flash_message', 'Aucune nouvelle distribution possible (pas de correspondance type/description, ou tout est déjà distribué).');
+            $this->app->set('flash_message', 'Aucune nouvelle distribution possible.');
         }
 
         $this->app->redirect('/dispatch');

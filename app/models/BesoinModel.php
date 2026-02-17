@@ -42,20 +42,43 @@ class BesoinModel
 
     /**
      * Récupérer les besoins non satisfaits (quantité restante > 0)
-     * Calcul dynamique via la table distributions
+     * Calcul dynamique via distributions uniquement (les achats créent des distributions)
      */
     public function getNonSatisfaits(): array
     {
         $statement = $this->app->db()->prepare(
             'SELECT besoins.*, 
                     villes.nom AS ville_nom,
-                    (besoins.quantite - COALESCE(SUM(distributions.quantite_attribuee), 0)) AS quantite_restante
+                    (besoins.quantite 
+                        - COALESCE((SELECT SUM(distributions.quantite_attribuee) FROM distributions WHERE distributions.besoin_id = besoins.id), 0)
+                    ) AS quantite_restante
              FROM besoins
              JOIN villes ON besoins.ville_id = villes.id
-             LEFT JOIN distributions ON besoins.id = distributions.besoin_id
              GROUP BY besoins.id
              HAVING quantite_restante > 0
              ORDER BY besoins.date_besoin ASC'
+        );
+        $statement->execute();
+        return $statement->fetchAll();
+    }
+
+    /**
+     * Récupérer les besoins nature/materiaux non satisfaits (pour achats)
+     */
+    public function getBesoinsAchetables(): array
+    {
+        $statement = $this->app->db()->prepare(
+            "SELECT besoins.*, 
+                    villes.nom AS ville_nom,
+                    (besoins.quantite 
+                        - COALESCE((SELECT SUM(distributions.quantite_attribuee) FROM distributions WHERE distributions.besoin_id = besoins.id), 0)
+                    ) AS quantite_restante
+             FROM besoins
+             JOIN villes ON besoins.ville_id = villes.id
+             WHERE besoins.type_besoin IN ('nature', 'materiaux')
+             GROUP BY besoins.id
+             HAVING quantite_restante > 0
+             ORDER BY besoins.date_besoin ASC"
         );
         $statement->execute();
         return $statement->fetchAll();

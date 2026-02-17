@@ -29,6 +29,10 @@ if (function_exists('mb_internal_encoding') === true) {
 	mb_internal_encoding('UTF-8');
 }
 
+// Directory separator
+$ds = DIRECTORY_SEPARATOR;
+
+
 // Default Locale Change as needed or feel free to remove.
 if (function_exists('setlocale') === true) {
 	setlocale(LC_ALL, 'en_US.UTF-8');
@@ -42,7 +46,9 @@ if (function_exists('setlocale') === true) {
 if (empty($app) === true) {
 	$app = Flight::app();
 }
-define('BASE_URL', rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'));
+if (!defined('BASE_URL')) {
+	define('BASE_URL', rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'));
+}
 // This autoloads your code in the app directory so you don't have to require_once everything
 // You'll need to namespace your classes with "app\folder\" to include them properly
 $app->path(__DIR__ . $ds . '..' . $ds . '..');
@@ -83,6 +89,11 @@ return [
  		'password' => '',  // Database password (nevmessageer commit real passwords)
 
 	],
+
+	/**************************************
+	 *         Frais d'achat (%)          *
+	 **************************************/
+	'frais_achat' => 10, // Frais d'achat en pourcentage (ex: 10 = 10%)
 
 	// Google OAuth Credentials
 	// 'google_oauth' => [

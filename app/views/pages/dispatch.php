@@ -37,15 +37,25 @@ include __DIR__ . '/../layouts/header.php';
                 <div class="dispatch-icon">
                     <i class="bi bi-shuffle"></i>
                 </div>
-                <h4>Algorithme de Distribution</h4>
-                <p class="text-muted mb-4 fs-6 fw-bold">
-                   <span class="text-danger fs-6 fw-bold">**</span> L'algorithme va matcher chaque don avec les besoins correspondants (même type & description).
+                <h3>Algorithme de Distribution</h3>
+                <p class="text-muted mb-4">
+                    L'algorithme va matcher chaque don avec les besoins correspondants (même type & description), 
+                    en respectant l'ordre chronologique (FIFO).
                 </p>
-                <form action="/dispatch/run" method="POST" id="dispatchForm">
-                    <button type="submit" class="btn btn-warning btn-lg btn-custom dispatch-btn" id="dispatchBtn">
-                        <i class="bi bi-play-circle-fill me-2"></i>Lancer la Simulation
-                    </button>
-                </form>
+                <div class="d-flex gap-3 justify-content-center">
+                    <!-- Bouton Simuler -->
+                    <form action="/dispatch/simulate" method="POST">
+                        <button type="submit" class="btn btn-info btn-lg btn-custom" id="simulateBtn">
+                            <i class="bi bi-eye-fill me-2"></i>Simuler
+                        </button>
+                    </form>
+                    <!-- Bouton Valider -->
+                    <form action="/dispatch/run" method="POST" id="dispatchForm">
+                        <button type="submit" class="btn btn-success btn-lg btn-custom dispatch-btn" id="dispatchBtn">
+                            <i class="bi bi-check-circle-fill me-2"></i>Valider
+                        </button>
+                    </form>
+                </div>
             </div>
             <div class="dispatch-steps">
                 <div class="dispatch-step">
@@ -70,6 +80,62 @@ include __DIR__ . '/../layouts/header.php';
         </div>
     </div>
 </div>
+
+<!-- Résultats de Simulation -->
+<?php if (!empty($simulation)): ?>
+<div class="content-card animate__animated animate__fadeInUp mb-4" style="border: 2px solid #17a2b8;">
+    <div class="content-card-header" style="background: linear-gradient(135deg, #17a2b8, #138496);">
+        <h3 class="content-card-title">
+            <i class="bi bi-eye-fill me-2"></i>Aperçu de la Simulation
+        </h3>
+        <div class="content-card-actions">
+            <span class="badge bg-light text-info">
+                <?= count($simulation) ?> distribution(s) prévue(s)
+            </span>
+        </div>
+    </div>
+    <div class="content-card-body">
+        <div class="alert alert-info mb-3">
+            <i class="bi bi-info-circle me-2"></i>
+            Ceci est un <strong>aperçu</strong>. Cliquez sur <strong>Valider</strong> pour enregistrer ces distributions.
+        </div>
+        <div class="table-responsive">
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th><i class="bi bi-geo-alt me-1"></i>Ville</th>
+                        <th><i class="bi bi-tag me-1"></i>Type</th>
+                        <th><i class="bi bi-clipboard me-1"></i>Besoin</th>
+                        <th><i class="bi bi-gift me-1"></i>Don</th>
+                        <th><i class="bi bi-123 me-1"></i>Quantité</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($simulation as $index => $sim): ?>
+                        <tr class="table-info">
+                            <td><?= $index + 1 ?></td>
+                            <td><?= htmlspecialchars($sim['ville_nom']) ?></td>
+                            <td>
+                                <?php if ($sim['type'] === 'nature'): ?>
+                                    <span class="badge bg-success">🌾 Nature</span>
+                                <?php elseif ($sim['type'] === 'materiaux'): ?>
+                                    <span class="badge bg-warning text-dark">🔨 Matériaux</span>
+                                <?php else: ?>
+                                    <span class="badge bg-info">💰 Argent</span>
+                                <?php endif; ?>
+                            </td>
+                            <td><?= htmlspecialchars($sim['besoin_desc']) ?></td>
+                            <td><?= htmlspecialchars($sim['don_desc']) ?></td>
+                            <td><strong><?= $sim['quantite'] ?></strong></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <!-- Distributions Table -->
 <div class="content-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">

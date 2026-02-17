@@ -40,7 +40,9 @@
                         ['/villes', 'bi-geo-alt-fill', 'Villes'],
                         ['/besoins', 'bi-clipboard2-pulse-fill', 'Besoins'],
                         ['/dons', 'bi-gift-fill', 'Dons'],
+                        ['/achats', 'bi-cart-fill', 'Achats'],
                         ['/dispatch', 'bi-arrow-left-right', 'Dispatch'],
+                        ['/recap', 'bi-graph-up-arrow', 'Récap'],
                     ];
                     foreach ($nav_items as $item):
                         $is_active = ($current_uri === $item[0]) || ($item[0] !== '/' && str_starts_with($current_uri, $item[0]));

@@ -6,7 +6,9 @@ INSERT INTO regions (nom) VALUES
 ('Diana'),
 ('Sava');
 
--- VILLES
+-- ====================================
+-- INSERTION DES VILLES
+-- ====================================
 INSERT INTO villes (nom, region_id) VALUES
 ('Tamatave', 1),
 ('Antananarivo', 2),
@@ -15,8 +17,9 @@ INSERT INTO villes (nom, region_id) VALUES
 ('Morondava', 4),
 ('Antsiranana', 5),
 ('Antalaha', 6);
-
--- BESOINS
+-- ====================================
+-- INSERTION DES BESOINS
+-- ====================================
 INSERT INTO besoins (ville_id, type_besoin, description, quantite, prix_unitaire) VALUES
 (2, 'nature', 'Riz', 100, 5000),
 (2, 'materiaux', 'Tôle', 50, 15000),
@@ -30,7 +33,9 @@ INSERT INTO besoins (ville_id, type_besoin, description, quantite, prix_unitaire
 (7, 'materiaux', 'Bois', 40, 8000),
 (8, 'nature', 'Riz', 90, 5000);
 
--- DONS
+-- ====================================
+-- INSERTION DES DONS
+-- ====================================
 INSERT INTO dons (type_don, description, quantite) VALUES
 ('nature', 'Riz', 150),
 ('materiaux', 'Tôle', 40),

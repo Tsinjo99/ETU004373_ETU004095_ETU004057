@@ -25,9 +25,9 @@ class DashboardController
         $this->distributionModel = new DistributionModel($app);
     }
 
-    /**
-     * Afficher le tableau de bord avec les KPIs et l'état des villes
-     */
+    // /**
+    //  * Afficher le tableau de bord avec les KPIs et l'état des villes
+    //  */
     public function index(): void
     {
         // KPIs
